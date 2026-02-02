@@ -8,6 +8,7 @@ DOCSTRING
 '''
 from typing import List, Tuple
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
 
 from dotplotter import check_input, parser, chunks
 
@@ -44,6 +45,10 @@ def plot_dotplot(x_values: List[Tuple], y_values: List[Tuple], colour: str) -> N
     '''
     for x_value, y_value in zip(x_values, y_values):
         plt.plot(x_value, y_value, color = colour)
+    
+    ax = plt.gca()
+    ax.xaxis.set_major_locator(MultipleLocator(1e6))
+    ax.yaxis.set_major_locator(MultipleLocator(1e6))
 
 def main():
     '''
@@ -60,7 +65,8 @@ def main():
     highlight_start = args.highlight_start
     highlight_end = args.highlight_end
     color = args.colour
-    outfile = args.output
+    outfile= f'{args.output}.{args.format}'
+    outfile_fmt = args.format
     highlight_color = args.highlight_colour
     bin_file = args.highlight_file
 
@@ -86,8 +92,19 @@ def main():
         subject_values.append((line_dict['sstart'], line_dict['send']))
         line_dicts.append(line_dict)
 
-    #plot
-    plt.figure(figsize=(3.7,3.7))
+    SCALE = 4.0
+    y_max = max(v for _, v in subject_values)
+    x_max = max(v for _, v in query_values)
+    width = (x_max / 1e6)
+    height = (y_max / 1e6)
+    if width < 1.5 and height < 1.5:
+        print(f"Scaling dimensions by a scale factor of {SCALE}...")
+        width *= SCALE
+        height *= SCALE
+
+    print(f'Plot dimensions\nWidth: {width}\nHeight: {height}')
+    plt.figure(figsize=(width, height))
+
     plot_dotplot(query_values, subject_values, color)
 
     for _bin in bins:
@@ -108,5 +125,6 @@ def main():
 
     # Display the plot
     plt.grid(True)
-    plt.savefig(outfile)
+    # plt.savefig(outfile)
+    plt.savefig(outfile, format=outfile_fmt, transparent=True, bbox_inches='tight')
     print('Done!')

@@ -42,9 +42,18 @@ def get_parser():
         '-o',
         '--output',
         type=str,
-        default='output.png',
+        default='output',
         help = (
-            'path to .png for the outputfile'
+            'path to the output file'
+        )
+    )
+    parser.add_argument(
+        '-f',
+        '--format',
+        choices=["png", "svg"],
+        default="png",
+        help=(
+            "output file format"
         )
     )
     parser.add_argument(
